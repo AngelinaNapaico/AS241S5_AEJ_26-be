@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: angelina.napaico
+  data:
+    mongodb:
+      uri: mongodb+srv://angelinanapaico_db_user:ange12345678@cluster0.hiizd1a.mongodb.net/ia_db?appName=Cluster0
+      database: ia_db
+rapidapi:
+  key: c7670db228msh4c0aee5e9a2ce22p14bf95jsndfd065182e43
+  summarizer:
+    host: article-extractor-and-summarizer.p.rapidapi.com
+    url: https://article-extractor-and-summarizer.p.rapidapi.com/summarize
+  translate:
+    host: deep-translate1.p.rapidapi.com
+    url: https://deep-translate1.p.rapidapi.com/language/translate/v2

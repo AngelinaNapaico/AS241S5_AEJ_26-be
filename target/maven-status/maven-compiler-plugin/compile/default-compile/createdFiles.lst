@@ -1,0 +1,13 @@
+ap1\angelina\napaico\rest\TranslateRest$TranslateRequest.class
+ap1\angelina\napaico\rest\TranslateRest.class
+ap1\angelina\napaico\config\WebClientConfig.class
+ap1\angelina\napaico\repository\TranslateResultRepository.class
+ap1\angelina\napaico\rest\SummaryRest$SummaryRequest.class
+ap1\angelina\napaico\model\SummaryResult.class
+ap1\angelina\napaico\repository\SummaryResultRepository.class
+ap1\angelina\napaico\service\SummaryService.class
+ap1\angelina\napaico\model\TranslateResult.class
+ap1\angelina\napaico\Application.class
+ap1\angelina\napaico\repository\ApiResultRepository.class
+ap1\angelina\napaico\rest\SummaryRest.class
+ap1\angelina\napaico\service\TranslateService.class
