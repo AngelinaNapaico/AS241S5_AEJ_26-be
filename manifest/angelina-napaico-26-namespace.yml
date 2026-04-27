@@ -1,0 +1,6 @@
+# kubectl create namespace angelina-napaico-26-namespace (COMANDO)
+# kubectl apply -f angelina-napaico-26-namespace.yml (yml)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: angelina-napaico-26-namespace
