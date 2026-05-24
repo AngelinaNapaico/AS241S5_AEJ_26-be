@@ -39,5 +39,5 @@ jobs:
           file: ./dockerfile-angelina/Dockerfile        # Dockerfile en la carpeta dockerfile-angelina
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME_ANGELINA }}/as241s5_aej_00-be:latest
-            ${{ secrets.DOCKERHUB_USERNAME_ANGELINA }}/as241s5_aej_00-be:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME_ANGELINA }}/as241s5_aej_26-be:latest
+            ${{ secrets.DOCKERHUB_USERNAME_ANGELINA }}/as241s5_aej_26-be:${{ github.sha }}
