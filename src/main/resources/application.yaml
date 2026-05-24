@@ -10,6 +10,7 @@ rapidapi:
   summarizer:
     host: article-extractor-and-summarizer.p.rapidapi.com
     url: https://article-extractor-and-summarizer.p.rapidapi.com/summarize
+    text-url: https://article-extractor-and-summarizer.p.rapidapi.com/summarize-text
   translate:
     host: deep-translate1.p.rapidapi.com
     url: https://deep-translate1.p.rapidapi.com/language/translate/v2

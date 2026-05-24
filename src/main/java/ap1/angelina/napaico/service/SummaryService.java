@@ -3,16 +3,10 @@ package ap1.angelina.napaico.service;
 import ap1.angelina.napaico.model.SummaryResult;
 import ap1.angelina.napaico.repository.SummaryResultRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
-
-import java.time.Duration;
 
 import java.util.Map;
 
@@ -28,8 +22,8 @@ public class SummaryService {
     @Value("${rapidapi.summarizer.host}")
     private String host;
 
-    @Value("${rapidapi.summarizer.url}")
-    private String url;
+    @Value("${rapidapi.summarizer.text-url}")
+    private String textUrl;
 
     public SummaryService(WebClient webClient, SummaryResultRepository repository) {
         this.webClient = webClient;
@@ -43,28 +37,24 @@ public class SummaryService {
      * @param length     longitud del resumen en párrafos (0 = automático)
      * @param lang       idioma del resumen (ej: "en", "es")
      */
-    public Mono<SummaryResult> summarizeAndSave(String articleUrl, int length, String lang) {
-        String uri = UriComponentsBuilder.fromHttpUrl(url)
-                .queryParam("url", articleUrl)
-                .queryParam("length", length)
-                .queryParam("lang", lang)
-                .build(false)
-                .encode()
-                .toUriString();
+    public Mono<SummaryResult> summarizeAndSave(String text, int length, String lang) {
+        Map<String, Object> body = Map.of(
+                "text", text,
+                "length", length,
+                "lang", lang
+        );
 
-        return webClient.get()
-                .uri(uri)
+        return webClient.post()
+                .uri(textUrl)
                 .header("Content-Type", "application/json")
                 .header("x-rapidapi-host", host)
                 .header("x-rapidapi-key", apiKey)
+                .bodyValue(body)
                 .retrieve()
                 .bodyToMono(Map.class)
-                .retryWhen(Retry.backoff(3, Duration.ofSeconds(2))
-                        .filter(e -> e instanceof WebClientResponseException &&
-                                ((WebClientResponseException) e).getStatusCode() == HttpStatus.SERVICE_UNAVAILABLE))
                 .flatMap(response -> {
                     SummaryResult result = new SummaryResult();
-                    result.setUrl(articleUrl);
+                    result.setText(text.substring(0, Math.min(text.length(), 100)));
                     result.setLength(length);
                     result.setLang(lang);
                     result.setRawResponse((Map<String, Object>) response);
@@ -73,6 +63,38 @@ public class SummaryService {
     }
 
     public Flux<SummaryResult> getAll() {
-        return repository.findAll();
+        return repository.findAll().filter(r -> !r.isDeleted());
+    }
+
+    /** Actualiza el texto y vuelve a llamar a la API con el nuevo contenido */
+    public Mono<SummaryResult> update(String id, String text, int length, String lang) {
+        return repository.findById(id)
+                .flatMap(existing -> {
+                    Map<String, Object> body = Map.of("text", text, "length", length, "lang", lang);
+                    return webClient.post()
+                            .uri(textUrl)
+                            .header("Content-Type", "application/json")
+                            .header("x-rapidapi-host", host)
+                            .header("x-rapidapi-key", apiKey)
+                            .bodyValue(body)
+                            .retrieve()
+                            .bodyToMono(Map.class)
+                            .flatMap(response -> {
+                                existing.setText(text.substring(0, Math.min(text.length(), 100)));
+                                existing.setLength(length);
+                                existing.setLang(lang);
+                                existing.setRawResponse((Map<String, Object>) response);
+                                return repository.save(existing);
+                            });
+                });
+    }
+
+    /** Borrado lógico: marca el registro como eliminado sin borrarlo de MongoDB */
+    public Mono<SummaryResult> delete(String id) {
+        return repository.findById(id)
+                .flatMap(existing -> {
+                    existing.setDeleted(true);
+                    return repository.save(existing);
+                });
     }
 }

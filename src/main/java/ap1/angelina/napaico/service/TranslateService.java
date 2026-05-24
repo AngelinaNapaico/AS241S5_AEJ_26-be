@@ -63,6 +63,38 @@ public class TranslateService {
     }
 
     public Flux<TranslateResult> getAll() {
-        return repository.findAll();
+        return repository.findAll().filter(r -> !r.isDeleted());
+    }
+
+    /** Actualiza el texto y vuelve a llamar a la API con el nuevo contenido */
+    public Mono<TranslateResult> update(String id, String q, String source, String target) {
+        return repository.findById(id)
+                .flatMap(existing -> {
+                    Map<String, Object> body = Map.of("q", q, "source", source, "target", target);
+                    return webClient.post()
+                            .uri(url)
+                            .header("Content-Type", "application/json")
+                            .header("x-rapidapi-host", host)
+                            .header("x-rapidapi-key", apiKey)
+                            .bodyValue(body)
+                            .retrieve()
+                            .bodyToMono(Map.class)
+                            .flatMap(response -> {
+                                existing.setQ(q);
+                                existing.setSource(source);
+                                existing.setTarget(target);
+                                existing.setRawResponse((Map<String, Object>) response);
+                                return repository.save(existing);
+                            });
+                });
+    }
+
+    /** Borrado lógico */
+    public Mono<TranslateResult> delete(String id) {
+        return repository.findById(id)
+                .flatMap(existing -> {
+                    existing.setDeleted(true);
+                    return repository.save(existing);
+                });
     }
 }

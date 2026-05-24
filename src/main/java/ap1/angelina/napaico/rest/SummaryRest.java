@@ -8,6 +8,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/summary")
+@CrossOrigin(origins = "*")
 public class SummaryRest {
 
     private final SummaryService service;
@@ -16,27 +17,29 @@ public class SummaryRest {
         this.service = service;
     }
 
-    /**
-     * POST /api/summary
-     * Resume el artículo de la URL dada y guarda el resultado en MongoDB.
-     *
-     * Ejemplo body:
-     * {
-     *   "url": "https://time.com/6286679/musk-ai-open-letter/",
-     *   "length": 3,
-     *   "lang": "en"
-     * }
-     */
+    /** POST /api/summary — Resume un texto y lo guarda en MongoDB */
     @PostMapping
     public Mono<SummaryResult> summarize(@RequestBody SummaryRequest request) {
-        return service.summarizeAndSave(request.url(), request.length(), request.lang());
+        return service.summarizeAndSave(request.text(), request.length(), request.lang());
     }
 
-    /** GET /api/summary - Retorna todos los resúmenes guardados */
+    /** GET /api/summary — Lista todos los registros activos */
     @GetMapping
     public Flux<SummaryResult> getAll() {
         return service.getAll();
     }
 
-    public record SummaryRequest(String url, int length, String lang) {}
+    /** PUT /api/summary/{id} — Actualiza el texto, llama a la API y guarda el nuevo resultado */
+    @PutMapping("/{id}")
+    public Mono<SummaryResult> update(@PathVariable String id, @RequestBody SummaryRequest request) {
+        return service.update(id, request.text(), request.length(), request.lang());
+    }
+
+    /** DELETE /api/summary/{id} — Borrado lógico */
+    @DeleteMapping("/{id}")
+    public Mono<SummaryResult> delete(@PathVariable String id) {
+        return service.delete(id);
+    }
+
+    public record SummaryRequest(String text, int length, String lang) {}
 }

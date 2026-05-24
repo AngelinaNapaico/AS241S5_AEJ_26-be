@@ -14,6 +14,7 @@ public class TranslateResult {
     private String q;
     private String source;
     private String target;
+    private boolean deleted = false;
     private Map<String, Object> rawResponse;
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -28,6 +29,9 @@ public class TranslateResult {
 
     public String getTarget() { return target; }
     public void setTarget(String target) { this.target = target; }
+
+    public boolean isDeleted() { return deleted; }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
     public Map<String, Object> getRawResponse() { return rawResponse; }
     public void setRawResponse(Map<String, Object> rawResponse) { this.rawResponse = rawResponse; }
